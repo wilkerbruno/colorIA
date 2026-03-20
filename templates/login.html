@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entrar – ColorIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body class="auth-body">
+
+<div class="auth-container">
+  <div class="auth-visual">
+    <a href="/" class="logo logo-auth">
+      <span class="logo-icon">✦</span>
+      Color<span class="logo-accent">IA</span>
+    </a>
+    <div class="auth-drawings">
+      <div class="auth-draw-card" style="--delay:0s">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="white" rx="8"/><path d="M25,70 L25,40 L15,20 L35,35 L50,30 L65,35 L85,20 L75,40 L75,70 Q75,85 50,90 Q25,85 25,70" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-linecap="round"/><circle cx="40" cy="57" r="4" fill="none" stroke="#7c3aed" stroke-width="2"/><circle cx="60" cy="57" r="4" fill="none" stroke="#7c3aed" stroke-width="2"/></svg>
+      </div>
+      <div class="auth-draw-card" style="--delay:0.3s">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="white" rx="8"/><path d="M50,15 L61,37 L87,37 L67,54 L74,78 L50,62 L26,78 L33,54 L13,37 L39,37 Z" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="auth-draw-card" style="--delay:0.6s">
+        <svg viewBox="0 0 100 100"><rect width="100" height="100" fill="white" rx="8"/><path d="M50,78 C50,78 18,58 18,36 C18,22 30,13 40,22 C44,25 48,30 50,34 C52,30 56,25 60,22 C70,13 82,22 82,36 C82,58 50,78 50,78 Z" fill="none" stroke="#7c3aed" stroke-width="2.5"/></svg>
+      </div>
+    </div>
+    <div class="auth-quote">
+      <p>"Gerei meu primeiro pacote para o Etsy em menos de 5 minutos!"</p>
+      <span>— Ana Lima, criadora digital</span>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Entrar</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Criar Conta</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="auth-form" id="form-login">
+      <h2>Bem-vindo de volta!</h2>
+      <p class="auth-sub">Continue criando seus desenhos incríveis</p>
+      <div id="login-error" class="form-error" style="display:none"></div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button class="btn-submit" onclick="doLogin()">
+        <span id="login-btn-text">Entrar</span>
+        <div class="spinner" id="login-spinner" style="display:none"></div>
+      </button>
+      <div class="auth-switch">
+        Não tem conta? <a onclick="switchTab('register')">Criar agora</a>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="auth-form" id="form-register" style="display:none">
+      <h2>Comece a criar agora!</h2>
+      <p class="auth-sub">5 gerações grátis por dia — sem cartão de crédito</p>
+      <div id="register-error" class="form-error" style="display:none"></div>
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" id="reg-name" placeholder="Seu nome">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres">
+      </div>
+      <button class="btn-submit" onclick="doRegister()">
+        <span id="reg-btn-text">Criar Conta Grátis</span>
+        <div class="spinner" id="reg-spinner" style="display:none"></div>
+      </button>
+      <div class="auth-switch">
+        Já tem conta? <a onclick="switchTab('login')">Entrar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Switch to register tab if #register in URL
+  if (window.location.hash === '#register') {
+    setTimeout(() => switchTab('register'), 100);
+  }
+
+  function switchTab(tab) {
+    document.getElementById('form-login').style.display = tab === 'login' ? 'flex' : 'none';
+    document.getElementById('form-register').style.display = tab === 'register' ? 'flex' : 'none';
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  }
+
+  async function doLogin() {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    const btn = document.getElementById('login-btn-text');
+    const spinner = document.getElementById('login-spinner');
+
+    errEl.style.display = 'none';
+    btn.style.display = 'none';
+    spinner.style.display = 'block';
+
+    try {
+      const res = await fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = data.redirect;
+      } else {
+        errEl.textContent = data.error;
+        errEl.style.display = 'block';
+      }
+    } catch(e) {
+      errEl.textContent = 'Erro de conexão. Tente novamente.';
+      errEl.style.display = 'block';
+    } finally {
+      btn.style.display = 'inline';
+      spinner.style.display = 'none';
+    }
+  }
+
+  async function doRegister() {
+    const name = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    const errEl = document.getElementById('register-error');
+    const btn = document.getElementById('reg-btn-text');
+    const spinner = document.getElementById('reg-spinner');
+
+    errEl.style.display = 'none';
+    if (!name || !email || !password) {
+      errEl.textContent = 'Preencha todos os campos.';
+      errEl.style.display = 'block';
+      return;
+    }
+
+    btn.style.display = 'none';
+    spinner.style.display = 'block';
+
+    try {
+      const res = await fetch('/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = data.redirect;
+      } else {
+        errEl.textContent = data.error;
+        errEl.style.display = 'block';
+      }
+    } catch(e) {
+      errEl.textContent = 'Erro de conexão. Tente novamente.';
+      errEl.style.display = 'block';
+    } finally {
+      btn.style.display = 'inline';
+      spinner.style.display = 'none';
+    }
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const loginVisible = document.getElementById('form-login').style.display !== 'none';
+      if (loginVisible) doLogin();
+      else doRegister();
+    }
+  });
+</script>
+</body>
+</html>

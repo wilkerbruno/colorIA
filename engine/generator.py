@@ -1,0 +1,20 @@
+from engine.scenes import generate_scene
+
+def generate_svg(prompt="coloring page"):
+
+    scene=generate_scene()
+
+    svg=f'''
+<svg xmlns="http://www.w3.org/2000/svg"
+viewBox="0 0 500 500"
+stroke-linecap="round"
+stroke-linejoin="round">
+
+<rect width="500" height="500" fill="white"/>
+
+{''.join(scene)}
+
+</svg>
+'''
+
+    return svg

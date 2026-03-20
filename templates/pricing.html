@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preços – ColorIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/main.css">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="/" class="logo">
+      <span class="logo-icon">✦</span>
+      Color<span class="logo-accent">IA</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">Início</a>
+      {% if user %}
+        <a href="/dashboard" class="btn-nav">Meu Painel</a>
+      {% else %}
+        <a href="/login" class="btn-nav">Entrar</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<section class="pricing-page">
+  <div class="container">
+    <div class="section-tag">Preços</div>
+    <h1 class="section-title">Simples e transparente</h1>
+    <p class="pricing-sub">Comece grátis. Faça upgrade quando quiser escalar seus ganhos.</p>
+
+    <div id="toast-msg" class="toast" style="display:none"></div>
+
+    <div class="pricing-grid">
+      <!-- FREE -->
+      <div class="pricing-card">
+        <div class="pricing-card-header">
+          <div class="plan-emoji">🆓</div>
+          <h2>Gratuito</h2>
+          <div class="price-display">
+            <span class="price-amount">R$ 0</span>
+            <span class="price-period">/mês para sempre</span>
+          </div>
+        </div>
+        <ul class="pricing-features">
+          <li class="feat-yes"><span>✓</span> 5 gerações por dia</li>
+          <li class="feat-yes"><span>✓</span> Todos os estilos (Infantil, Animais, Personagens, Educativo)</li>
+          <li class="feat-yes"><span>✓</span> Download PNG</li>
+          <li class="feat-yes"><span>✓</span> Cartelas de figurinhas (limite diário)</li>
+          <li class="feat-no"><span>✗</span> Download PDF</li>
+          <li class="feat-no"><span>✗</span> Pacotes comerciais (Etsy/KDP)</li>
+          <li class="feat-no"><span>✗</span> Gerações ilimitadas</li>
+          <li class="feat-no"><span>✗</span> Suporte prioritário</li>
+        </ul>
+        <a href="/login#register" class="btn-pricing-ghost">Começar Grátis</a>
+      </div>
+
+      <!-- PREMIUM -->
+      <div class="pricing-card pricing-card-premium">
+        <div class="pricing-popular-badge">⚡ Mais Popular</div>
+        <div class="pricing-card-header">
+          <div class="plan-emoji">⭐</div>
+          <h2>Premium</h2>
+          <div class="price-display">
+            <span class="price-amount">R$ 29</span>
+            <span class="price-period">/mês</span>
+          </div>
+          <div class="price-annual">ou R$ 249/ano — economize R$ 99</div>
+        </div>
+        <ul class="pricing-features">
+          <li class="feat-yes"><span>✓</span> <strong>Gerações ilimitadas</strong></li>
+          <li class="feat-yes"><span>✓</span> Download PDF + PNG (alta resolução)</li>
+          <li class="feat-yes"><span>✓</span> <strong>Pacotes comerciais (Etsy/KDP)</strong></li>
+          <li class="feat-yes"><span>✓</span> Descrição e tags SEO automáticas</li>
+          <li class="feat-yes"><span>✓</span> Todos os estilos e categorias</li>
+          <li class="feat-yes"><span>✓</span> Cartelas de figurinhas ilimitadas</li>
+          <li class="feat-yes"><span>✓</span> Histórico completo</li>
+          <li class="feat-yes"><span>✓</span> Suporte prioritário</li>
+        </ul>
+        {% if user %}
+          {% if user.plan == 'premium' %}
+            <div class="current-plan-badge">✓ Seu plano atual</div>
+          {% else %}
+            <button class="btn-pricing" onclick="doUpgrade()">Assinar Premium</button>
+          {% endif %}
+        {% else %}
+          <a href="/login#register" class="btn-pricing">Começar com Premium</a>
+        {% endif %}
+        <p class="pricing-note">✓ Cancele quando quiser &nbsp;|&nbsp; ✓ Suporte em 24h</p>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-section">
+      <h2>Dúvidas frequentes</h2>
+      <div class="faq-grid">
+        <div class="faq-item">
+          <h4>Posso vender os desenhos gerados?</h4>
+          <p>Sim! Com o plano Premium, você tem licença comercial para vender os desenhos no Etsy, Amazon KDP, Hotmart e outras plataformas.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Os downloads são em alta resolução?</h4>
+          <p>Sim. Os arquivos são gerados em formato vetorial (SVG) e PDF, garantindo qualidade perfeita para impressão em qualquer tamanho.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Como funciona o pacote comercial?</h4>
+          <p>O pacote gera automaticamente 10 desenhos relacionados ao tema, além de nome do produto, descrição otimizada e tags SEO prontos para colar no Etsy.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Posso cancelar a assinatura?</h4>
+          <p>Sim, você pode cancelar a qualquer momento. O acesso Premium continua até o fim do período pago.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="logo"><span class="logo-icon">✦</span>Color<span class="logo-accent">IA</span></div>
+      <p>© 2024 ColorIA. Feito com ❤️ para criadores brasileiros.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+async function doUpgrade() {
+  const btn = document.querySelector('.btn-pricing');
+  const toast = document.getElementById('toast-msg');
+  btn.textContent = 'Processando...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/api/upgrade', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    const data = await res.json();
+    if (data.success) {
+      toast.textContent = '🎉 ' + data.message;
+      toast.className = 'toast toast-success';
+      toast.style.display = 'block';
+      setTimeout(() => window.location.href = '/dashboard', 2000);
+    }
+  } catch(e) {
+    toast.textContent = 'Erro ao processar. Tente novamente.';
+    toast.className = 'toast toast-error';
+    toast.style.display = 'block';
+    btn.textContent = 'Assinar Premium';
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

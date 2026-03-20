@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel – ColorIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body class="dash-body">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <a href="/" class="logo logo-sidebar">
+    <span class="logo-icon">✦</span>
+    Color<span class="logo-accent">IA</span>
+  </a>
+  <nav class="sidebar-nav">
+    <a href="#" class="sidebar-link active" data-tab="drawing" onclick="switchTab('drawing', this)">
+      <span class="sicon">🎨</span> Desenhos
+    </a>
+    <a href="#" class="sidebar-link" data-tab="stickers" onclick="switchTab('stickers', this)">
+      <span class="sicon">🧷</span> Figurinhas
+    </a>
+    <a href="#" class="sidebar-link" data-tab="pack" onclick="switchTab('pack', this)">
+      <span class="sicon">📦</span> Pacote Comercial
+      {% if user.plan == 'free' %}<span class="badge-pro">PRO</span>{% endif %}
+    </a>
+    <a href="#" class="sidebar-link" data-tab="history" onclick="switchTab('history', this); loadHistory()">
+      <span class="sicon">📋</span> Histórico
+    </a>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="plan-badge-sidebar {{ user.plan }}">
+      {% if user.plan == 'premium' %}
+        ⭐ Plano Premium
+      {% else %}
+        🆓 Plano Gratuito
+        <a href="/pricing" class="upgrade-link">Fazer Upgrade</a>
+      {% endif %}
+    </div>
+    <div class="user-info">
+      <div class="user-avatar">{{ user.name[0].upper() }}</div>
+      <div>
+        <div class="user-name">{{ user.name }}</div>
+        <div class="user-email">{{ user.email }}</div>
+      </div>
+    </div>
+    <a href="/logout" class="logout-btn">Sair</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="dash-main">
+  <!-- HEADER -->
+  <header class="dash-header">
+    <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+    <div class="dash-header-info">
+      <h1 id="dash-title">Gerador de Desenhos</h1>
+    </div>
+    <div class="usage-bar-wrap">
+      {% if user.plan == 'free' %}
+        <div class="usage-label">{{ usage }}/5 hoje</div>
+        <div class="usage-bar">
+          <div class="usage-fill" style="width: {{ (usage/5*100)|int }}%"></div>
+        </div>
+      {% else %}
+        <div class="usage-label premium-label">⭐ Ilimitado</div>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- TAB: DRAWINGS -->
+  <section class="tab-content active" id="tab-drawing">
+    <div class="generator-layout">
+      <div class="gen-panel">
+        <div class="gen-card">
+          <h2 class="gen-title">🎨 Criar Desenho para Colorir</h2>
+          
+          <div class="form-group">
+            <label>Descreva o desenho</label>
+            <textarea id="draw-prompt" placeholder="Ex: leão fofo com juba grande, princesa no castelo encantado, robô brincando de futebol..." rows="3"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Estilo / Categoria</label>
+            <div class="style-grid">
+              <button class="style-btn active" data-style="infantil" onclick="selectStyle(this)">👶 Infantil</button>
+              <button class="style-btn" data-style="animais" onclick="selectStyle(this)">🐾 Animais</button>
+              <button class="style-btn" data-style="personagens" onclick="selectStyle(this)">🦸 Personagens</button>
+              <button class="style-btn" data-style="educativo" onclick="selectStyle(this)">📚 Educativo</button>
+            </div>
+          </div>
+
+          <button class="btn-generate" id="btn-generate" onclick="generateDrawing()">
+            <span id="gen-btn-text">✨ Gerar Desenho</span>
+            <div class="spinner" id="gen-spinner" style="display:none"></div>
+          </button>
+        </div>
+      </div>
+
+      <div class="result-panel">
+        <div id="draw-placeholder" class="result-placeholder">
+          <div class="placeholder-icon">🎨</div>
+          <p>Seu desenho aparecerá aqui</p>
+          <span>Descreva e clique em Gerar</span>
+        </div>
+        <div id="draw-result" style="display:none">
+          <div class="result-card">
+            <div class="result-toolbar">
+              <span id="result-label">Desenho gerado</span>
+              <div class="result-actions">
+                <button onclick="downloadSVG()" class="btn-dl btn-dl-png">⬇ PNG</button>
+                <button onclick="downloadPDF()" class="btn-dl btn-dl-pdf">⬇ PDF</button>
+              </div>
+            </div>
+            <div class="result-image" id="result-image-container"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB: STICKERS -->
+  <section class="tab-content" id="tab-stickers" style="display:none">
+    <div class="generator-layout">
+      <div class="gen-panel">
+        <div class="gen-card">
+          <h2 class="gen-title">🧷 Cartela de Figurinhas</h2>
+          
+          <div class="form-group">
+            <label>Tema das figurinhas</label>
+            <textarea id="sticker-prompt" placeholder="Ex: animais fofos, estrelas e corações, personagens de fantasia..." rows="2"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Quantidade de figurinhas</label>
+            <div class="count-selector">
+              <button onclick="changeCount(-3)" class="count-btn">-</button>
+              <span id="sticker-count">9</span>
+              <button onclick="changeCount(3)" class="count-btn">+</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="toggle-label">
+              <input type="checkbox" id="border-toggle" checked>
+              <span class="toggle-switch"></span>
+              Borda para recorte
+            </label>
+          </div>
+
+          <button class="btn-generate" onclick="generateStickers()">
+            <span id="stk-btn-text">✨ Gerar Cartela</span>
+            <div class="spinner" id="stk-spinner" style="display:none"></div>
+          </button>
+        </div>
+      </div>
+
+      <div class="result-panel">
+        <div id="sticker-placeholder" class="result-placeholder">
+          <div class="placeholder-icon">🧷</div>
+          <p>Sua cartela aparecerá aqui</p>
+          <span>Configure e clique em Gerar</span>
+        </div>
+        <div id="sticker-result" style="display:none">
+          <div class="result-card">
+            <div class="result-toolbar">
+              <span>Cartela de figurinhas</span>
+              <div class="result-actions">
+                <button onclick="downloadStickerPDF()" class="btn-dl btn-dl-pdf">⬇ Baixar PDF</button>
+              </div>
+            </div>
+            <div class="sticker-grid" id="sticker-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB: COMMERCIAL PACK -->
+  <section class="tab-content" id="tab-pack" style="display:none">
+    <div class="generator-layout">
+      <div class="gen-panel">
+        <div class="gen-card">
+          <h2 class="gen-title">📦 Pacote para Etsy / KDP</h2>
+          {% if user.plan == 'free' %}
+          <div class="upgrade-banner">
+            <div class="upgrade-icon">⭐</div>
+            <div>
+              <strong>Recurso Premium</strong>
+              <p>Gere pacotes completos prontos para vender. Faça upgrade para desbloquear.</p>
+            </div>
+            <a href="/pricing" class="btn-upgrade-sm">Upgrade</a>
+          </div>
+          {% endif %}
+          
+          <div class="form-group">
+            <label>Tema do pacote</label>
+            <textarea id="pack-prompt" placeholder="Ex: animais da floresta, unicórnios mágicos, alfabeto divertido..." rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Categoria</label>
+            <div class="style-grid">
+              <button class="style-btn active" data-style="infantil" onclick="selectPackStyle(this)">👶 Infantil</button>
+              <button class="style-btn" data-style="animais" onclick="selectPackStyle(this)">🐾 Animais</button>
+              <button class="style-btn" data-style="personagens" onclick="selectPackStyle(this)">🦸 Personagens</button>
+              <button class="style-btn" data-style="educativo" onclick="selectPackStyle(this)">📚 Educativo</button>
+            </div>
+          </div>
+
+          <button class="btn-generate btn-generate-gold" onclick="generatePack()">
+            <span id="pack-btn-text">🚀 Gerar Pacote Comercial</span>
+            <div class="spinner" id="pack-spinner" style="display:none"></div>
+          </button>
+        </div>
+      </div>
+
+      <div class="result-panel">
+        <div id="pack-placeholder" class="result-placeholder">
+          <div class="placeholder-icon">📦</div>
+          <p>Pacote completo para venda</p>
+          <span>Gere 10 desenhos + texto de vendas + tags SEO</span>
+        </div>
+        <div id="pack-result" style="display:none">
+          <div class="pack-meta" id="pack-meta"></div>
+          <div class="pack-drawings-grid" id="pack-drawings-grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB: HISTORY -->
+  <section class="tab-content" id="tab-history" style="display:none">
+    <div class="history-header">
+      <h2>📋 Histórico de Gerações</h2>
+    </div>
+    <div id="history-grid" class="history-grid">
+      <div class="loading-history">Carregando histórico...</div>
+    </div>
+  </section>
+</main>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="upgrade-modal" style="display:none" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-icon">⭐</div>
+    <h3>Limite Atingido!</h3>
+    <p>Você usou todas as suas gerações gratuitas de hoje. Faça upgrade para o plano Premium e gere sem limites!</p>
+    <div class="modal-actions">
+      <a href="/pricing" class="btn-primary">Ver Planos Premium</a>
+      <button onclick="closeModal()" class="btn-ghost">Continuar Grátis</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/dashboard.js"></script>
+</body>
+</html>
